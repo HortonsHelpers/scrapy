@@ -256,11 +256,10 @@ class RFC2616PolicyTest(DefaultStorageTest):
             result = mw.process_request(request, self.spider)
             if result:
                 assert isinstance(result, (Request, Response))
-                return result
             else:
                 result = mw.process_response(request, response, self.spider)
                 assert isinstance(result, Response)
-                return result
+            return result
         except Exception:
             print('Request', request)
             print('Response', response)
@@ -363,26 +362,38 @@ class RFC2616PolicyTest(DefaultStorageTest):
             (200, {'Date': self.yesterday, 'Expires': self.tomorrow}),
             (200, {'Date': self.yesterday, 'Cache-Control': 'max-age=86405'}),
             (200, {'Age': '299', 'Cache-Control': 'max-age=300'}),
-            # Obey max-age if present over any others
-            (200, {'Date': self.today,
-                   'Age': '86405',
-                   'Cache-Control': 'max-age=' + str(86400 * 3),
-                   'Expires': self.yesterday,
-                   'Last-Modified': self.yesterday,
-                   }),
-            # obey Expires if max-age is not present
-            (200, {'Date': self.yesterday,
-                   'Age': '86400',
-                   'Cache-Control': 'public',
-                   'Expires': self.tomorrow,
-                   'Last-Modified': self.yesterday,
-                   }),
-            # Default missing Date header to right now
+            (
+                200,
+                {
+                    'Date': self.today,
+                    'Age': '86405',
+                    'Cache-Control': f'max-age={str(86400 * 3)}',
+                    'Expires': self.yesterday,
+                    'Last-Modified': self.yesterday,
+                },
+            ),
+            (
+                200,
+                {
+                    'Date': self.yesterday,
+                    'Age': '86400',
+                    'Cache-Control': 'public',
+                    'Expires': self.tomorrow,
+                    'Last-Modified': self.yesterday,
+                },
+            ),
             (200, {'Expires': self.tomorrow}),
-            # Firefox - Expires if age is greater than 10% of (Date - Last-Modified)
-            (200, {'Date': self.today, 'Last-Modified': self.yesterday, 'Age': str(86400 / 10 - 1)}),
-            # Firefox - Set one year maxage to permanent redirects missing expiration info
-            (300, {}), (301, {}), (308, {}),
+            (
+                200,
+                {
+                    'Date': self.today,
+                    'Last-Modified': self.yesterday,
+                    'Age': str(86400 / 10 - 1),
+                },
+            ),
+            (300, {}),
+            (301, {}),
+            (308, {}),
         ]
         with self._middleware() as mw:
             for idx, (status, headers) in enumerate(sampledata):

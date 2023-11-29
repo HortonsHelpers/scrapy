@@ -36,12 +36,8 @@ def build_storage(builder, uri, *args, feed_options=None, preargs=(), **kwargs):
         kwargs['feed_options'] = feed_options
     else:
         warnings.warn(
-            "{} does not support the 'feed_options' keyword argument. Add a "
-            "'feed_options' parameter to its signature to remove this "
-            "warning. This parameter will become mandatory in a future "
-            "version of Scrapy."
-            .format(builder.__qualname__),
-            category=ScrapyDeprecationWarning
+            f"{builder.__qualname__} does not support the 'feed_options' keyword argument. Add a 'feed_options' parameter to its signature to remove this warning. This parameter will become mandatory in a future version of Scrapy.",
+            category=ScrapyDeprecationWarning,
         )
     return builder(*preargs, uri, *args, **kwargs)
 
@@ -49,15 +45,15 @@ def build_storage(builder, uri, *args, feed_options=None, preargs=(), **kwargs):
 class IFeedStorage(Interface):
     """Interface that all Feed Storages must implement"""
 
-    def __init__(uri, *, feed_options=None):
+    def __init__(self, *, feed_options=None):
         """Initialize the storage with the parameters given in the URI and the
         feed-specific options (see :setting:`FEEDS`)"""
 
-    def open(spider):
+    def open(self):
         """Open the storage for the given spider. It must return a file-like
         object that will be used for the exporters"""
 
-    def store(file):
+    def store(self):
         """Store the given file stream"""
 
 
@@ -67,7 +63,7 @@ class BlockingFeedStorage:
     def open(self, spider):
         path = spider.crawler.settings['FEED_TEMPDIR']
         if path and not os.path.isdir(path):
-            raise OSError('Not a Directory: ' + str(path))
+            raise OSError(f'Not a Directory: {str(path)}')
 
         return NamedTemporaryFile(prefix='feed-', dir=path)
 
@@ -420,10 +416,7 @@ class FeedExporter:
         for uri_template, values in self.feeds.items():
             if values['batch_item_count'] and not re.search(r'%\(batch_time\)s|%\(batch_id\)', uri_template):
                 logger.error(
-                    '%(batch_time)s or %(batch_id)d must be in the feed URI ({}) if FEED_EXPORT_BATCH_ITEM_COUNT '
-                    'setting or FEEDS.batch_item_count is specified and greater than 0. For more info see: '
-                    'https://docs.scrapy.org/en/latest/topics/feed-exports.html#feed-export-batch-item-count'
-                    ''.format(uri_template)
+                    f'%(batch_time)s or %(batch_id)d must be in the feed URI ({uri_template}) if FEED_EXPORT_BATCH_ITEM_COUNT setting or FEEDS.batch_item_count is specified and greater than 0. For more info see: https://docs.scrapy.org/en/latest/topics/feed-exports.html#feed-export-batch-item-count'
                 )
                 return False
         return True
@@ -472,13 +465,11 @@ class FeedExporter:
             instance = build_instance(feedcls)
             method_name = '__new__'
         if instance is None:
-            raise TypeError("%s.%s returned None" % (feedcls.__qualname__, method_name))
+            raise TypeError(f"{feedcls.__qualname__}.{method_name} returned None")
         return instance
 
     def _get_uri_params(self, spider, uri_params, slot=None):
-        params = {}
-        for k in dir(spider):
-            params[k] = getattr(spider, k)
+        params = {k: getattr(spider, k) for k in dir(spider)}
         utc_now = datetime.utcnow()
         params['time'] = utc_now.replace(microsecond=0).isoformat().replace(':', '-')
         params['batch_time'] = utc_now.isoformat().replace(':', '-')

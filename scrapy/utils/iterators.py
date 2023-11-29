@@ -35,8 +35,11 @@ def xmliter(obj, nodename):
     namespaces = {}
     if header_end:
         for tagname in reversed(re.findall(END_TAG_RE, header_end)):
-            tag = re.search(fr'<\s*{tagname}.*?xmlns[:=][^>]*>', text[:header_end_idx[1]], re.S)
-            if tag:
+            if tag := re.search(
+                fr'<\s*{tagname}.*?xmlns[:=][^>]*>',
+                text[: header_end_idx[1]],
+                re.S,
+            ):
                 namespaces.update(reversed(x) for x in re.findall(NAMESPACE_RE, tag.group()))
 
     r = re.compile(fr'<{nodename_patt}[\s>].*?</{nodename_patt}>', re.DOTALL)

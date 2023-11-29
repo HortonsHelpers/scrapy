@@ -27,6 +27,9 @@ def _with_mkdir(queue_class):
 
 def _serializable_queue(queue_class, serialize, deserialize):
 
+
+
+
     class SerializableQueue(queue_class):
 
         def push(self, obj):
@@ -34,9 +37,9 @@ def _serializable_queue(queue_class, serialize, deserialize):
             super().push(s)
 
         def pop(self):
-            s = super().pop()
-            if s:
+            if s := super().pop():
                 return deserialize(s)
+
 
     return SerializableQueue
 

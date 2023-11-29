@@ -67,12 +67,10 @@ class TestSpider(Spider):
 
     def parse_item(self, response):
         item = self.item_cls()
-        m = self.name_re.search(response.text)
-        if m:
+        if m := self.name_re.search(response.text):
             item['name'] = m.group(1)
         item['url'] = response.url
-        m = self.price_re.search(response.text)
-        if m:
+        if m := self.price_re.search(response.text):
             item['price'] = m.group(1)
         return item
 
@@ -142,7 +140,7 @@ class CrawlerRun:
         self.itemerror = []
         self.itemresp = []
         self.headers = {}
-        self.bytes = defaultdict(lambda: list())
+        self.bytes = defaultdict(lambda: [])
         self.signals_caught = {}
         self.spider_class = spider_class
 

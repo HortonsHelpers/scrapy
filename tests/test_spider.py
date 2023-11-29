@@ -255,6 +255,8 @@ class CrawlSpiderTest(SpiderTest):
 
         response = HtmlResponse("http://example.org/somepage/index.html", body=self.test_body)
 
+
+
         class _CrawlSpider(self.spider_class):
             name = "test"
             allowed_domains = ['example.org']
@@ -263,8 +265,8 @@ class CrawlSpiderTest(SpiderTest):
             )
 
             def dummy_process_links(self, links):
-                for link in links:
-                    yield link
+                yield from links
+
 
         spider = _CrawlSpider()
         output = list(spider._requests_to_follow(response))
@@ -585,16 +587,20 @@ class DeprecationTest(unittest.TestCase):
         assert isinstance(CrawlSpider(name='foo'), Spider)
 
     def test_make_requests_from_url_deprecated(self):
+
         class MySpider4(Spider):
             name = 'spider1'
             start_urls = ['http://example.com']
+
+
 
         class MySpider5(Spider):
             name = 'spider2'
             start_urls = ['http://example.com']
 
             def make_requests_from_url(self, url):
-                return Request(url + "/foo", dont_filter=True)
+                return Request(f"{url}/foo", dont_filter=True)
+
 
         with warnings.catch_warnings(record=True) as w:
             # spider without overridden make_requests_from_url method

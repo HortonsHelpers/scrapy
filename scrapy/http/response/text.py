@@ -88,10 +88,10 @@ class TextResponse(Response):
     @property
     def text(self):
         """ Body as unicode """
-        # access self.encoding before _cached_ubody to make sure
-        # _body_inferred_encoding is called
-        benc = self.encoding
         if self._cached_ubody is None:
+            # access self.encoding before _cached_ubody to make sure
+            # _body_inferred_encoding is called
+            benc = self.encoding
             charset = f'charset={benc}'
             self._cached_ubody = html_to_unicode(charset, self.body)[1]
         return self._cached_ubody

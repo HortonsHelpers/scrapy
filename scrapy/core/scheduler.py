@@ -78,8 +78,7 @@ class Scheduler:
         if not request.dont_filter and self.df.request_seen(request):
             self.df.log(request, self.spider)
             return False
-        dqok = self._dqpush(request)
-        if dqok:
+        if dqok := self._dqpush(request):
             self.stats.inc_value('scheduler/enqueued/disk', spider=self.spider)
         else:
             self._mqpush(request)

@@ -36,7 +36,7 @@ def request_to_dict(request, spider=None):
         'cb_kwargs': request.cb_kwargs,
     }
     if type(request) is not Request:
-        d['_class'] = request.__module__ + '.' + request.__class__.__name__
+        d['_class'] = f'{request.__module__}.{request.__class__.__name__}'
     return d
 
 

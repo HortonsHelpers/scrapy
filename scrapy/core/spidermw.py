@@ -53,8 +53,7 @@ class SpiderMiddlewareManager(MiddlewareManager):
 
     def _evaluate_iterable(self, response, spider, iterable, exception_processor_index, recover_to):
         try:
-            for r in iterable:
-                yield r
+            yield from iterable
         except Exception as ex:
             exception_result = self._process_spider_exception(response, spider, Failure(ex),
                                                               exception_processor_index)

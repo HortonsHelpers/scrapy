@@ -78,10 +78,7 @@ class Request(object_ref):
         return self._body
 
     def _set_body(self, body):
-        if body is None:
-            self._body = b''
-        else:
-            self._body = to_bytes(body, self.encoding)
+        self._body = b'' if body is None else to_bytes(body, self.encoding)
 
     body = property(_get_body, obsolete_setter(_set_body, 'body'))
 

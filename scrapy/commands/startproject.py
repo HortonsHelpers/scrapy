@@ -93,11 +93,7 @@ class Command(ScrapyCommand):
             raise UsageError()
 
         project_name = args[0]
-        project_dir = args[0]
-
-        if len(args) == 2:
-            project_dir = args[1]
-
+        project_dir = args[1] if len(args) == 2 else args[0]
         if exists(join(project_dir, 'scrapy.cfg')):
             self.exitcode = 1
             print(f'Error: scrapy.cfg already exists in {abspath(project_dir)}')

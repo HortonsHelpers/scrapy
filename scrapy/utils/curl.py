@@ -84,7 +84,7 @@ def curl_to_request_kwargs(curl_command, ignore_unknown_options=True):
     # needs the scheme to work
     parsed_url = urlparse(url)
     if not parsed_url.scheme:
-        url = 'http://' + url
+        url = f'http://{url}'
 
     method = parsed_args.method or 'GET'
 

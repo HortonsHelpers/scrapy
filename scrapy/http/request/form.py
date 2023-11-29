@@ -83,19 +83,16 @@ def _get_form(response, formname, formid, formnumber, formxpath):
         raise ValueError(f"No <form> element found in {response}")
 
     if formname is not None:
-        f = root.xpath(f'//form[@name="{formname}"]')
-        if f:
+        if f := root.xpath(f'//form[@name="{formname}"]'):
             return f[0]
 
     if formid is not None:
-        f = root.xpath(f'//form[@id="{formid}"]')
-        if f:
+        if f := root.xpath(f'//form[@id="{formid}"]'):
             return f[0]
 
     # Get form element from xpath, if not found, go up
     if formxpath is not None:
-        nodes = root.xpath(formxpath)
-        if nodes:
+        if nodes := root.xpath(formxpath):
             el = nodes[0]
             while True:
                 if el.tag == 'form':
@@ -138,7 +135,11 @@ def _get_inputs(form, formdata, dont_click, clickdata, response):
 
     if not dont_click:
         clickable = _get_clickable(clickdata, form)
-        if clickable and clickable[0] not in formdata and not clickable[0] is None:
+        if (
+            clickable
+            and clickable[0] not in formdata
+            and clickable[0] is not None
+        ):
             values.append(clickable)
 
     if isinstance(formdata, dict):
@@ -151,9 +152,7 @@ def _get_inputs(form, formdata, dont_click, clickdata, response):
 def _value(ele):
     n = ele.name
     v = ele.value
-    if ele.tag == 'select':
-        return _select_value(ele, n, v)
-    return n, v
+    return _select_value(ele, n, v) if ele.tag == 'select' else (n, v)
 
 
 def _select_value(ele, n, v):

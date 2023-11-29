@@ -273,8 +273,7 @@ class ScrapyAgent:
     def _get_agent(self, request, timeout):
         from twisted.internet import reactor
         bindaddress = request.meta.get('bindaddress') or self._bindAddress
-        proxy = request.meta.get('proxy')
-        if proxy:
+        if proxy := request.meta.get('proxy'):
             _, _, proxyHost, proxyPort, proxyParams = _parse(proxy)
             scheme = _parse(request.url)[0]
             proxyHost = to_unicode(proxyHost)
@@ -288,18 +287,7 @@ class ScrapyAgent:
                     "from the Zyte Smart Proxy Manager URL.",
                     ScrapyDeprecationWarning,
                 )
-            if scheme == b'https' and not omitConnectTunnel:
-                proxyAuth = request.headers.get(b'Proxy-Authorization', None)
-                proxyConf = (proxyHost, proxyPort, proxyAuth)
-                return self._TunnelingAgent(
-                    reactor=reactor,
-                    proxyConf=proxyConf,
-                    contextFactory=self._contextFactory,
-                    connectTimeout=timeout,
-                    bindAddress=bindaddress,
-                    pool=self._pool,
-                )
-            else:
+            if scheme != b'https' or omitConnectTunnel:
                 return self._ProxyAgent(
                     reactor=reactor,
                     proxyURI=to_bytes(proxy, encoding='ascii'),
@@ -308,6 +296,16 @@ class ScrapyAgent:
                     pool=self._pool,
                 )
 
+            proxyAuth = request.headers.get(b'Proxy-Authorization', None)
+            proxyConf = (proxyHost, proxyPort, proxyAuth)
+            return self._TunnelingAgent(
+                reactor=reactor,
+                proxyConf=proxyConf,
+                contextFactory=self._contextFactory,
+                connectTimeout=timeout,
+                bindAddress=bindaddress,
+                pool=self._pool,
+            )
         return self._Agent(
             reactor=reactor,
             contextFactory=self._contextFactory,
@@ -327,10 +325,7 @@ class ScrapyAgent:
         headers = TxHeaders(request.headers)
         if isinstance(agent, self._TunnelingAgent):
             headers.removeHeader(b'Proxy-Authorization')
-        if request.body:
-            bodyproducer = _RequestBodyProducer(request.body)
-        else:
-            bodyproducer = None
+        bodyproducer = _RequestBodyProducer(request.body) if request.body else None
         start_time = time()
         d = agent.request(method, to_bytes(url, encoding='ascii'), headers, bodyproducer)
         # set download latency

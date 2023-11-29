@@ -254,8 +254,7 @@ class BrokenStartRequestsSpider(FollowAllSpider):
 
     def parse(self, response):
         self.seedsseen.append(response.meta.get('seed'))
-        for req in super().parse(response):
-            yield req
+        yield from super().parse(response)
 
 
 class SingleRequestSpider(MetaSpider):
@@ -291,7 +290,7 @@ class DuplicateStartRequestsSpider(MockServerSpider):
 
     def start_requests(self):
         for i in range(0, self.distinct_urls):
-            for j in range(0, self.dupe_factor):
+            for _ in range(0, self.dupe_factor):
                 url = self.mockserver.url(f"/echo?headers=1&body=test{i}")
                 yield Request(url, dont_filter=self.dont_filter)
 

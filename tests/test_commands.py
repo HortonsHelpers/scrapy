@@ -119,10 +119,14 @@ class StartprojectTest(ProjectTest):
         assert exists(join(join(abspath(project_dir), self.project_name), 'settings.py'))
         assert exists(join(join(abspath(project_dir), self.project_name), 'spiders', '__init__.py'))
 
-        self.assertEqual(0, self.call('startproject', self.project_name, project_dir + '2'))
+        self.assertEqual(
+            0, self.call('startproject', self.project_name, f'{project_dir}2')
+        )
 
         self.assertEqual(1, self.call('startproject', self.project_name, project_dir))
-        self.assertEqual(1, self.call('startproject', self.project_name + '2', project_dir))
+        self.assertEqual(
+            1, self.call('startproject', f'{self.project_name}2', project_dir)
+        )
         self.assertEqual(1, self.call('startproject', 'wrong---project---name'))
         self.assertEqual(1, self.call('startproject', 'sys'))
         self.assertEqual(2, self.call('startproject'))
@@ -464,7 +468,7 @@ class GenspiderStandaloneCommandTest(ProjectTest):
 
     def test_same_name_as_existing_file(self, force=False):
         file_name = 'example'
-        file_path = join(self.temp_path, file_name + '.py')
+        file_path = join(self.temp_path, f'{file_name}.py')
         p, out, err = self.proc('genspider', file_name, 'example.com')
         self.assertIn(f"Created spider {file_name!r} using template \'basic\' ", out)
         assert exists(file_path)
@@ -481,7 +485,7 @@ class GenspiderStandaloneCommandTest(ProjectTest):
             self.assertNotEqual(file_contents_after, file_contents_before)
         else:
             p, out, err = self.proc('genspider', file_name, 'example.com')
-            self.assertIn(f"{join(self.temp_path, file_name + '.py')} already exists", out)
+            self.assertIn(f"{join(self.temp_path, f'{file_name}.py')} already exists", out)
             modify_time_after = getmtime(file_path)
             self.assertEqual(modify_time_after, modify_time_before)
             file_contents_after = open(file_path, 'r').read()
@@ -651,7 +655,10 @@ class MySpider(scrapy.Spider):
         ])
         import asyncio
         loop = asyncio.new_event_loop()
-        self.assertIn("Using asyncio event loop: %s.%s" % (loop.__module__, loop.__class__.__name__), log)
+        self.assertIn(
+            f"Using asyncio event loop: {loop.__module__}.{loop.__class__.__name__}",
+            log,
+        )
 
     def test_output(self):
         spider_code = """

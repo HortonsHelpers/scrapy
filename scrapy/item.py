@@ -53,10 +53,10 @@ class ItemMeta(_BaseItemMeta):
     .. _metaclass: https://realpython.com/python-metaclasses
     """
 
-    def __new__(mcs, class_name, bases, attrs):
+    def __new__(cls, class_name, bases, attrs):
         classcell = attrs.pop('__classcell__', None)
         new_bases = tuple(base._class for base in bases if hasattr(base, '_class'))
-        _class = super().__new__(mcs, 'x_' + class_name, new_bases, attrs)
+        _class = super().__new__(cls, f'x_{class_name}', new_bases, attrs)
 
         fields = getattr(_class, 'fields', {})
         new_attrs = {}
@@ -71,7 +71,7 @@ class ItemMeta(_BaseItemMeta):
         new_attrs['_class'] = _class
         if classcell is not None:
             new_attrs['__classcell__'] = classcell
-        return super().__new__(mcs, class_name, bases, new_attrs)
+        return super().__new__(cls, class_name, bases, new_attrs)
 
 
 class DictItem(MutableMapping, BaseItem):

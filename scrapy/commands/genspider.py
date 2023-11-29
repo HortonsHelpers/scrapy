@@ -18,7 +18,7 @@ def sanitize_module_name(module_name):
     """
     module_name = module_name.replace('-', '_').replace('.', '_')
     if module_name[0] not in string.ascii_letters:
-        module_name = "a" + module_name
+        module_name = f"a{module_name}"
     return module_name
 
 
@@ -51,15 +51,14 @@ class Command(ScrapyCommand):
             self._list_templates()
             return
         if opts.dump:
-            template_file = self._find_template(opts.dump)
-            if template_file:
+            if template_file := self._find_template(opts.dump):
                 with open(template_file, "r") as f:
                     print(f.read())
             return
         if len(args) != 2:
             raise UsageError()
 
-        name, domain = args[0:2]
+        name, domain = args[:2]
         module = sanitize_module_name(name)
 
         if self.settings.get('BOT_NAME') == module:
@@ -69,8 +68,7 @@ class Command(ScrapyCommand):
         if not opts.force and self._spider_exists(name):
             return
 
-        template_file = self._find_template(opts.template)
-        if template_file:
+        if template_file := self._find_template(opts.template):
             self._genspider(module, name, domain, opts.template, template_file)
             if opts.edit:
                 self.exitcode = os.system(f'scrapy edit "{name}"')
@@ -116,8 +114,8 @@ class Command(ScrapyCommand):
     def _spider_exists(self, name):
         if not self.settings.get('NEWSPIDER_MODULE'):
             # if run as a standalone command and file with same filename already exists
-            if exists(name + ".py"):
-                print(f"{abspath(name + '.py')} already exists")
+            if exists(f"{name}.py"):
+                print(f"{abspath(f'{name}.py')} already exists")
                 return True
             return False
 
@@ -135,8 +133,8 @@ class Command(ScrapyCommand):
         spiders_module = import_module(self.settings['NEWSPIDER_MODULE'])
         spiders_dir = dirname(spiders_module.__file__)
         spiders_dir_abs = abspath(spiders_dir)
-        if exists(join(spiders_dir_abs, name + ".py")):
-            print(f"{join(spiders_dir_abs, (name + '.py'))} already exists")
+        if exists(join(spiders_dir_abs, f"{name}.py")):
+            print(f"{join(spiders_dir_abs, f'{name}.py')} already exists")
             return True
 
         return False

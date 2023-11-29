@@ -93,9 +93,7 @@ class LxmlParserLinkExtractor:
         return self._deduplicate_if_needed(links)
 
     def _deduplicate_if_needed(self, links):
-        if self.unique:
-            return unique_list(links, key=self.link_key)
-        return links
+        return unique_list(links, key=self.link_key) if self.unique else links
 
 
 class LxmlLinkExtractor(FilteringLinkExtractor):

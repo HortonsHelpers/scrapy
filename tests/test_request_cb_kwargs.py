@@ -90,7 +90,7 @@ class KeywordArgumentsSpider(MockServerSpider):
             self.checks.append(kwargs['number'] == 123)
             self.crawler.stats.inc_value('boolean_checks', 2)
         elif response.url.endswith('/general_without'):
-            self.checks.append(kwargs == {})
+            self.checks.append(not kwargs)
             self.crawler.stats.inc_value('boolean_checks')
 
     def parse_no_kwargs(self, response):

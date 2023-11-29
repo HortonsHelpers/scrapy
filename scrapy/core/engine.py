@@ -198,11 +198,7 @@ class ExecutionEngine:
             # not all start requests are handled
             return False
 
-        if self.slot.scheduler.has_pending_requests():
-            # scheduler has pending requests
-            return False
-
-        return True
+        return not self.slot.scheduler.has_pending_requests()
 
     @property
     def open_spiders(self):
@@ -351,8 +347,7 @@ class ExecutionEngine:
 
     def _close_all_spiders(self):
         dfds = [self.close_spider(s, reason='shutdown') for s in self.open_spiders]
-        dlist = defer.DeferredList(dfds)
-        return dlist
+        return defer.DeferredList(dfds)
 
     @defer.inlineCallbacks
     def _finish_stopping_engine(self):
